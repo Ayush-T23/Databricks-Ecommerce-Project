@@ -1,0 +1,1125 @@
+{
+  "datasets": [
+    {
+      "name": "d63f8c46",
+      "displayName": "gld_fact_order_items",
+      "queryLines": [
+        "SELECT\n",
+        "  transaction_date,\n",
+        "  SUM(net_amount) AS revenue\n",
+        "FROM\n",
+        "  gld_fact_order_items\n",
+        "GROUP BY\n",
+        "  transaction_date\n",
+        "ORDER BY\n",
+        "  transaction_date;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "c46a8a48",
+      "displayName": "Total Revenue",
+      "queryLines": [
+        "SELECT\n",
+        "  SUM(net_amount) AS total_revenue\n",
+        "FROM\n",
+        "  gld_fact_order_items;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "e9fd197d",
+      "displayName": "Total Orders",
+      "queryLines": [
+        "SELECT\n",
+        "  COUNT(DISTINCT transaction_id) AS total_orders\n",
+        "FROM\n",
+        "  gld_fact_order_items;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "2a2fb91b",
+      "displayName": "Average Order Value",
+      "queryLines": [
+        "SELECT\n",
+        "  SUM(net_amount) / COUNT(DISTINCT transaction_id) AS avg_order_value\n",
+        "FROM\n",
+        "  gld_fact_order_items;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "62923e5f",
+      "displayName": "Top Products by Name",
+      "queryLines": [
+        "SELECT\n",
+        "  CONCAT(p.brand_name, ' - ', p.category_name) AS product_name,\n",
+        "  SUM(f.net_amount) AS revenue\n",
+        "FROM\n",
+        "  gld_fact_order_items f\n",
+        "    JOIN gld_dim_products p\n",
+        "      ON f.product_id = p.product_id\n",
+        "GROUP BY\n",
+        "  CONCAT(p.brand_name, ' - ', p.category_name)\n",
+        "ORDER BY\n",
+        "  revenue DESC\n",
+        "LIMIT 10;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "8af3c5ba",
+      "displayName": "Revenue by Category",
+      "queryLines": [
+        "SELECT\n",
+        "  p.category_name AS category,\n",
+        "  SUM(f.net_amount) AS revenue\n",
+        "FROM\n",
+        "  gld_fact_order_items f\n",
+        "    JOIN gld_dim_products p\n",
+        "      ON f.product_id = p.product_id\n",
+        "GROUP BY\n",
+        "  p.category_name\n",
+        "ORDER BY\n",
+        "  revenue DESC;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "6ae1f6f5",
+      "displayName": "Monthly Revenue",
+      "queryLines": [
+        "SELECT\n",
+        "  date_trunc('month', transaction_date) AS month,\n",
+        "  date_format(date_trunc('month', transaction_date), 'MMM yyyy') AS month_label,\n",
+        "  SUM(net_amount) AS revenue\n",
+        "FROM\n",
+        "  ecommerce.gold.gld_fact_order_items\n",
+        "GROUP BY\n",
+        "  month,\n",
+        "  month_label\n",
+        "ORDER BY\n",
+        "  month;"
+      ]
+    },
+    {
+      "name": "bec512c0",
+      "displayName": "Total Customers",
+      "queryLines": [
+        "SELECT\n",
+        "  COUNT(DISTINCT customer_id) AS total_customers\n",
+        "FROM\n",
+        "  gld_fact_order_items;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "adfc9908",
+      "displayName": "Revenue by Channel",
+      "queryLines": [
+        "SELECT\n",
+        "  channel,\n",
+        "  SUM(net_amount) AS revenue\n",
+        "FROM\n",
+        "  gld_fact_order_items\n",
+        "GROUP BY\n",
+        "  channel\n",
+        "ORDER BY\n",
+        "  revenue DESC;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "f9b2e13d",
+      "displayName": "Top Customers by Revenue",
+      "queryLines": [
+        "SELECT\n",
+        "  CONCAT(c.region, ' - ', c.country, ' (', SUBSTRING(c.customer_id, 1, 8), '...)') AS customer_name,\n",
+        "  SUM(f.net_amount) AS revenue\n",
+        "FROM\n",
+        "  gld_fact_order_items f\n",
+        "    JOIN gld_dim_customers c\n",
+        "      ON f.customer_id = c.customer_id\n",
+        "GROUP BY\n",
+        "  CONCAT(c.region, ' - ', c.country, ' (', SUBSTRING(c.customer_id, 1, 8), '...)')\n",
+        "ORDER BY\n",
+        "  revenue DESC\n",
+        "LIMIT 10;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "26a78af5",
+      "displayName": "Coupon Impact Analysis",
+      "queryLines": [
+        "SELECT\n",
+        "  CASE\n",
+        "    WHEN coupon_flag = 1 THEN 'With Coupon'\n",
+        "    ELSE 'Without Coupon'\n",
+        "  END AS coupon_usage,\n",
+        "  SUM(net_amount) AS revenue,\n",
+        "  COUNT(DISTINCT transaction_id) AS orders\n",
+        "FROM\n",
+        "  gld_fact_order_items\n",
+        "GROUP BY\n",
+        "  CASE\n",
+        "    WHEN coupon_flag = 1 THEN 'With Coupon'\n",
+        "    ELSE 'Without Coupon'\n",
+        "  END;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    },
+    {
+      "name": "dc69eb78",
+      "displayName": "Day of Week Performance",
+      "queryLines": [
+        "SELECT\n",
+        "  date_format(transaction_date, 'EEEE') AS day_of_week,\n",
+        "  SUM(net_amount) AS revenue,\n",
+        "  COUNT(DISTINCT transaction_id) AS orders\n",
+        "FROM\n",
+        "  gld_fact_order_items\n",
+        "GROUP BY\n",
+        "  date_format(transaction_date, 'EEEE')\n",
+        "ORDER BY\n",
+        "  CASE date_format(transaction_date, 'EEEE')\n",
+        "    WHEN 'Monday' THEN 1\n",
+        "    WHEN 'Tuesday' THEN 2\n",
+        "    WHEN 'Wednesday' THEN 3\n",
+        "    WHEN 'Thursday' THEN 4\n",
+        "    WHEN 'Friday' THEN 5\n",
+        "    WHEN 'Saturday' THEN 6\n",
+        "    WHEN 'Sunday' THEN 7\n",
+        "  END;"
+      ],
+      "catalog": "ecommerce",
+      "schema": "gold"
+    }
+  ],
+  "pages": [
+    {
+      "name": "f595cf2c",
+      "displayName": "Dashboard",
+      "layout": [
+        {
+          "widget": {
+            "name": "81373bf3",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c46a8a48",
+                  "fields": [
+                    {
+                      "name": "total_revenue",
+                      "expression": "`total_revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Revenue",
+                "showTitle": true,
+                "showDescription": false
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Total Revenue"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "47b20612",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d63f8c46",
+                  "fields": [
+                    {
+                      "name": "transaction_date",
+                      "expression": "`transaction_date`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue Trend Over Time",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "transaction_date",
+                  "displayName": "Transaction Date",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 8,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "c3467436",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e9fd197d",
+                  "fields": [
+                    {
+                      "name": "total_orders",
+                      "expression": "`total_orders`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Orders",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_orders",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Total Orders"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 3,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "93bc5b8a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2a2fb91b",
+                  "fields": [
+                    {
+                      "name": "avg_order_value",
+                      "expression": "`avg_order_value`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Average Order Value",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_order_value",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Average Order Value"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "68a732f3",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "62923e5f",
+                  "fields": [
+                    {
+                      "name": "product_name",
+                      "expression": "`product_name`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top Products by Revenue",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "product_name",
+                  "displayName": "Product Name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "AcmeTech - Electronics",
+                        "ByteMax - Electronics",
+                        "EcoTone - Electronics",
+                        "PureLiving - Home & Kitchen",
+                        "NovaWave - Electronics",
+                        "Photonix - Electronics",
+                        "WarmHearth - Home & Kitchen",
+                        "SkyLink - Electronics",
+                        "VoltEdge - Electronics",
+                        "Zenith - Electronics"
+                      ]
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "product_name",
+                  "displayName": "Product Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "ba30d99f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8af3c5ba",
+                  "fields": [
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    },
+                    {
+                      "name": "category",
+                      "expression": "`category`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue Distribution by Category",
+                "showTitle": true
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "axis": {
+                    "hideTitle": false
+                  }
+                },
+                "color": {
+                  "fieldName": "category",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 20,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "2748d746",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6ae1f6f5",
+                  "fields": [
+                    {
+                      "name": "month_label",
+                      "expression": "`month_label`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Monthly Revenue Trend",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month_label",
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Aug 2025",
+                        "Sep 2025",
+                        "Oct 2025"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 3,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "98708a77",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bec512c0",
+                  "fields": [
+                    {
+                      "name": "total_customers",
+                      "expression": "`total_customers`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Customers",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_customers",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Total Customers"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 3,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "channel_revenue",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "adfc9908",
+                  "fields": [
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    },
+                    {
+                      "name": "channel",
+                      "expression": "`channel`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue by Sales Channel",
+                "showTitle": true
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Revenue"
+                },
+                "color": {
+                  "fieldName": "channel",
+                  "displayName": "Channel",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 20,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "top_customers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f9b2e13d",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top 10 Customers by Revenue",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "revenue",
+                  "displayName": "Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "customer_name",
+                  "displayName": "Customer",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "customer_name",
+                  "displayName": "Customer",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 13,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "coupon_impact",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "26a78af5",
+                  "fields": [
+                    {
+                      "name": "coupon_usage",
+                      "expression": "`coupon_usage`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Coupon Impact Analysis",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "coupon_usage",
+                  "displayName": "Coupon Usage",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "coupon_usage",
+                  "displayName": "Coupon Usage",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 20,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "day_of_week",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dc69eb78",
+                  "fields": [
+                    {
+                      "name": "day_of_week",
+                      "expression": "`day_of_week`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Revenue by Day of Week",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "day_of_week",
+                  "displayName": "Day of Week",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "day_of_week",
+                  "displayName": "Day of Week",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 13,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "header_text",
+            "multilineTextboxSpec": {
+              "lines": [
+                "This dashboard provides a comprehensive view of e-commerce performance, highlighting revenue trends, customer behavior, product performance, and the impact of discounts on sales.\n",
+                "\n",
+                "* **Electronics category dominates revenue** - 76% of total revenue ($1.38B)\n",
+                "* **Weekend sales outperform weekdays** - Saturday/Sunday peak at ~$294M each\n",
+                "* **Discounts do not significantly boost revenue** - Only 35% revenue comes from coupon usage\n",
+                "* **High dependency on few top customers** - Top 3 customers represent 97% of revenue ($1.79B)"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "cbc49d97",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6ae1f6f5",
+                  "fields": [
+                    {
+                      "name": "month_label",
+                      "expression": "`month_label`"
+                    },
+                    {
+                      "name": "revenue",
+                      "expression": "`revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Monthly Revenue",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "month_label",
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Revenue",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 7,
+            "width": 4,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "fcea9433",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "bcc4b6fc",
+            "queries": [
+              {
+                "name": "dashboards/01f12aa7a3bc1a2abba20cbecea7c9ae/datasets/01f12aa805e114efba5450322a399b88_transaction_date",
+                "query": {
+                  "datasetName": "d63f8c46",
+                  "fields": [
+                    {
+                      "name": "transaction_date",
+                      "expression": "`transaction_date`"
+                    },
+                    {
+                      "name": "transaction_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "transaction_date",
+                    "queryName": "dashboards/01f12aa7a3bc1a2abba20cbecea7c9ae/datasets/01f12aa805e114efba5450322a399b88_transaction_date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
